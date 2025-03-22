@@ -31,6 +31,6 @@ jobs:
             - name: Install project
               run: make install
             # Run linter
-#            - name: Run linter
-#              run: make lint
+            - name: Run linter
+              run: make lint
 
