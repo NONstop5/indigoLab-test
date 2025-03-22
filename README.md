@@ -16,3 +16,11 @@
 
 ### Run
 > `make start`
+
+### Run linters
+> `make lint`
+> 
+> `make lint-fix`
+
+### Run tests
+> `make test`
