@@ -1,4 +1,6 @@
 {
+    "name": "indigolab/test",
+    "description": "IndigoLab test project",
     "type": "project",
     "license": "proprietary",
     "minimum-stability": "stable",
