@@ -1,5 +1,5 @@
 ### Project tests and linter statuses:
-[![Main](https://github.com/NONstop5/php-project-lvl2/actions/workflows/main.yml/badge.svg)](https://github.com/NONstop5/php-project-lvl2/actions)
+[![Main](https://github.com/NONstop5/indigoLab-test/actions/workflows/main.yml/badge.svg)](https://github.com/NONstop5/indigoLab-test/actions)
 
 ## IndigoLab test project
 
