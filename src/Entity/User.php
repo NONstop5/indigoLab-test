@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\Table(name: '`user`')]
+#[ORM\Table(name: '`users`')]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_PHONE_NUMBER', fields: ['phoneNumber'])]
 class User implements UserInterface
 {
@@ -34,7 +34,7 @@ class User implements UserInterface
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
-    public function __construct()
+    private function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
     }
@@ -127,5 +127,21 @@ class User implements UserInterface
     public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
+    }
+
+    /**
+     * Фабричный метод в сущности, как написано в задании, если я правильно понял.
+     *
+     * @param list<string> $roles
+     */
+    public static function create(
+        string $phoneNumber,
+        array $roles = [],
+        ?string $name = null,
+    ): self {
+        return (new self())
+            ->setPhoneNumber($phoneNumber)
+            ->setRoles($roles)
+            ->setName($name);
     }
 }
