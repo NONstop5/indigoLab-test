@@ -31,7 +31,7 @@ class PhoneVerificationCode
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
-    public function __construct()
+    private function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
     }
@@ -92,5 +92,21 @@ class PhoneVerificationCode
     public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
+    }
+
+    /**
+     * Фабричный метод в сущности, как написано в задании, если я правильно понял.
+     */
+    public static function create(
+        string $phoneNumber,
+        string $code,
+        int $attempts = 0,
+        bool $isUsed = false,
+    ): self {
+        return (new self())
+            ->setPhoneNumber($phoneNumber)
+            ->setCode($code)
+            ->setAttempts($attempts)
+            ->setIsUsed($isUsed);
     }
 }

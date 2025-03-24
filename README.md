@@ -24,3 +24,29 @@
 
 ### Run tests
 > `make test`
+
+### API requests
+> Запрос кода подтверждения
+> 
+> POST
+> 
+> http://127.0.0.1:8000/api/user/request-code
+> 
+> ```json
+> {
+>    "phone_number": "+79157053551"
+> }
+> ```
+
+> Проверка кода подтверждения
+>
+> POST
+>
+> http://127.0.0.1:8000/api/verify-code
+>
+> ```json
+> {
+>    "phone_number": "+79157053551",
+>    "phone_code": "1234"
+> }
+> ```

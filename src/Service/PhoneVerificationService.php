@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-use App\Dto\Request\GetPhoneCodeDto;
+use App\Dto\Request\RequestPhoneCodeDto;
+use App\Dto\Response\AuthDto;
 use App\Dto\Response\PhoneCodeDto;
 use App\Entity\PhoneVerificationCode;
 use App\Entity\User;
 use App\Repository\PhoneVerificationCodeRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
 class PhoneVerificationService
@@ -18,19 +20,22 @@ class PhoneVerificationService
 
     private EntityManagerInterface $em;
     private PhoneVerificationCodeRepository $codeRepository;
+    private UserRepository $userRepository;
 
     public function __construct(
         EntityManagerInterface $em,
         PhoneVerificationCodeRepository $codeRepository,
+        UserRepository $userRepository,
     ) {
         $this->em = $em;
         $this->codeRepository = $codeRepository;
+        $this->userRepository = $userRepository;
     }
 
     /**
      * @throws \Exception
      */
-    public function getPhoneCode(GetPhoneCodeDto $getPhoneCodeDto): PhoneCodeDto
+    public function getPhoneCode(RequestPhoneCodeDto $getPhoneCodeDto): PhoneCodeDto
     {
         $phoneNumber = $getPhoneCodeDto->getPhoneNumber();
 
@@ -96,20 +101,20 @@ class PhoneVerificationService
     }
 
     /**
-     * @param array<string, mixed> $code
+     * @param array<string, mixed> $codeData
      *
      * @throws \Exception
      */
-    private function isActualExistedCode(array $code): bool
+    private function isActualExistedCode(array $codeData): bool
     {
         /** @var string $codeCreatedAt */
-        $codeCreatedAt = $code['created_at'];
+        $codeCreatedAt = $codeData['created_at'];
 
         // TODO:
         //  Возникли проблемы с временем, пришлось сделать костыль с timezone,
         //  надо будет с этим разобраться. Возможно в docker контейнере все наладится
-        $createdAt = new \DateTimeImmutable($codeCreatedAt, new \DateTimeZone('Europe/Moscow'));
-        $now = new \DateTimeImmutable('-1 minute', new \DateTimeZone('Europe/Moscow'));
+        $createdAt = new \DateTimeImmutable($codeCreatedAt);
+        $now = new \DateTimeImmutable('-1 minute');
 
         return $createdAt > $now;
     }
@@ -121,11 +126,67 @@ class PhoneVerificationService
 
     private function createPhoneVerificationCode(string $phoneNumber, string $newVerificationCode): void
     {
-        $verificationCode = new PhoneVerificationCode();
-        $verificationCode->setPhoneNumber($phoneNumber);
-        $verificationCode->setCode($newVerificationCode);
+        $verificationCode = PhoneVerificationCode::create(
+            $phoneNumber,
+            $newVerificationCode
+        );
 
         $this->em->persist($verificationCode);
         $this->em->flush();
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function verifyCode(string $phoneNumber, string $code): AuthDto
+    {
+        $lastCodeData = $this->codeRepository->getLastCode($phoneNumber);
+
+        if ($lastCodeData === false) {
+            throw new \Exception('Код не найден');
+        }
+
+        if (!$this->isActualExistedCode($lastCodeData)) {
+            throw new \Exception('Код истек, запросите новый');
+        }
+
+        /** @var PhoneVerificationCode $verificationCode */
+        $verificationCode = $this->codeRepository->find($lastCodeData['id']);
+
+        if ($lastCodeData['is_used']) {
+            throw new \Exception('Код уже использован');
+        }
+
+        if ($lastCodeData['code'] !== $code) {
+            throw new \Exception('Код неверный');
+        }
+
+        $user = $this->userRepository->findOneBy(['phoneNumber' => $lastCodeData['phone_number']]);
+
+        if ($user !== null) {
+            return new AuthDto('Authorise success', $user->getId());
+        }
+
+        /*
+         * Тут, думаю, стоит использовать в транзакцию,
+         * чтобы не получилось, что юзер создался, а код не пометился как использованный
+         */
+        $this->em->beginTransaction();
+
+        try {
+            $user = User::create($phoneNumber);
+            $this->em->persist($user);
+
+            $verificationCode->setIsUsed(true);
+
+            $this->em->flush();
+            $this->em->commit();
+        } catch (\Exception $e) {
+            $this->em->rollback();
+
+            throw $e;
+        }
+
+        return new AuthDto('Registration success', $user->getId());
     }
 }

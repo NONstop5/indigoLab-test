@@ -6,9 +6,9 @@ namespace App\Dto\Request;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
-class GetPhoneCodeDto
+class RequestPhoneCodeDto
 {
-    #[Assert\NotBlank(message: 'Phone number cannot be blank.')]
+    #[Assert\NotBlank(message: 'Phone number cannot be blank')]
     #[Assert\Regex(
         pattern: '/^\+79\d{9}$/',
         message: 'Phone number must be in the format +79151234567'
