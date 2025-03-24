@@ -1,14 +1,5 @@
 <?php
 
-$fileHeaderComment = <<<COMMENT
-This file is part of the Symfony package.
-
-(c) Fabien Potencier <fabien@symfony.com>
-
-For the full copyright and license information, please view the LICENSE
-file that was distributed with this source code.
-COMMENT;
-
 $finder = PhpCsFixer\Finder::create()
     ->in(__DIR__)
     ->exclude('config')
@@ -26,7 +17,6 @@ return (new PhpCsFixer\Config())
     ->setRules([
         '@Symfony' => true,
         '@Symfony:risky' => true,
-        'header_comment' => ['header' => $fileHeaderComment, 'separate' => 'both'],
         'linebreak_after_opening_tag' => true,
         'mb_str_functions' => true,
         'no_php4_constructor' => true,
@@ -38,6 +28,8 @@ return (new PhpCsFixer\Config())
         'strict_comparison' => true,
         'strict_param' => true,
         'blank_line_between_import_groups' => false,
+        'concat_space' => ['spacing' => 'one'],
+        'yoda_style' => false,
     ])
     ->setFinder($finder)
     ->setCacheFile(__DIR__.'/var/.php-cs-fixer.cache')
