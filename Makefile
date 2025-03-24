@@ -4,9 +4,10 @@ install:
 validate:
 	composer validate
 
+PORT ?= 8000
 start:
 	symfony server:start
-	#php -S localhost:8000 -t public/
+	#PHP_CLI_SERVER_WORKERS=5 php -S 0.0.0.0:$(PORT) -t public
 
 lint: phpcsfixer-check phpstan
 
@@ -26,5 +27,14 @@ phpstan-baseline:
 
 test:
 	./bin/phpunit
+
+docker-up-d:
+	docker-compose --env-file ./docker/.env up -d
+
+docker-down:
+	docker-compose --env-file ./docker/.env down -v
+
+docker-build:
+	docker-compose --env-file ./docker/.env build
 
 .PHONY: tests

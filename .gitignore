@@ -37,3 +37,8 @@ phpstan.neon
 /.php-cs-fixer.php
 /.php-cs-fixer.cache
 ###< friendsofphp/php-cs-fixer ###
+
+###> IDE files ###
+/docker/pgdata
+/docker/.env
+###> IDE files ###
