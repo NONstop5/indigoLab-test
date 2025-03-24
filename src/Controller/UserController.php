@@ -2,7 +2,8 @@
 
 namespace App\Controller;
 
-use App\Dto\Request\GetPhoneCodeDto;
+use App\Dto\Request\RequestPhoneCodeDto;
+use App\Dto\Request\VerifyPhoneCodeDto;
 use App\Service\PhoneVerificationService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -15,12 +16,12 @@ final class UserController extends AbstractController
      * @throws \Exception
      */
     #[Route(
-        '/user/request-code',
-        name: 'user_request_code',
+        '/request-code',
+        name: 'request_code',
         methods: ['POST'])
     ]
     public function requestCode(
-        #[MapRequestPayload] GetPhoneCodeDto $requestDto,
+        #[MapRequestPayload] RequestPhoneCodeDto $requestDto,
         PhoneVerificationService $verificationService,
     ): JsonResponse {
         $phoneCodeDto = $verificationService->getPhoneCode($requestDto);
@@ -28,17 +29,19 @@ final class UserController extends AbstractController
         return $this->json($phoneCodeDto);
     }
 
-    //    #[Route('/verify-code', methods: ['POST'])]
-    //    public function verifyCode(Request $request): JsonResponse
-    //    {
-    //        $phoneNumber = $request->request->get('phone_number');
-    //        $code = $request->request->get('code');
-    //
-    //        try {
-    //            $user = $this->verificationService->verifyCode($phoneNumber, $code);
-    //            return $this->json(['success' => true, 'user_id' => $user->getId()]);
-    //        } catch (\Exception $e) {
-    //            return $this->json(['error' => $e->getMessage()], 400);
-    //        }
-    //    }
+    /**
+     * @throws \Exception
+     */
+    #[Route('/verify-code', methods: ['POST'])]
+    public function verifyCode(
+        #[MapRequestPayload] VerifyPhoneCodeDto $requestDto,
+        PhoneVerificationService $verificationService,
+    ): JsonResponse {
+        $authDto = $verificationService->verifyCode(
+            $requestDto->getPhoneNumber(),
+            $requestDto->getPhoneCode()
+        );
+
+        return $this->json($authDto);
+    }
 }
