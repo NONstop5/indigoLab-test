@@ -4,11 +4,6 @@ install:
 validate:
 	composer validate
 
-PORT ?= 8000
-start:
-	symfony server:start
-	#PHP_CLI_SERVER_WORKERS=5 php -S 0.0.0.0:$(PORT) -t public
-
 lint: phpcsfixer-check phpstan
 
 lint-fix: phpcsfixer-fix phpstan
