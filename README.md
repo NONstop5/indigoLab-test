@@ -13,7 +13,7 @@
 > `git clone git@github.com:NONstop5/indigoLab-test.git`
 
 ### Run Docker
-> `cp ./docker/.env.dist .env`
+> `cp ./docker/.env.dist ./docker/.env`
 > 
 > `make docker-build`
 > 
