@@ -9,13 +9,24 @@
 - Make >= 4
 - Docker
 
-### Installation
+### Clone project
 > `git clone git@github.com:NONstop5/indigoLab-test.git`
+
+### Run Docker
+> `cp ./docker/.env.dist .env`
+> 
+> `make docker-build`
+> 
+> `make docker-up-d`
+> 
+> `make docker-down`
+
+### Installation
+> `cp .env.dist .env.local`
 > 
 > `make install`
-
-### Run
-> `make start`
+> 
+> `php bin/console doctrine:migrations:migrate`
 
 ### Run linters
 > `make lint`
