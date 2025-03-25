@@ -22,8 +22,6 @@
 > `make docker-down`
 
 ### Installation
-> `cp .env.dist .env.local`
-> 
 > `make install`
 > 
 > `php bin/console doctrine:migrations:migrate`
