@@ -2,6 +2,7 @@
 
 $finder = PhpCsFixer\Finder::create()
     ->in(__DIR__)
+    ->exclude('docker')
     ->exclude('config')
     ->exclude('var')
     ->exclude('public/bundles')
