@@ -3,13 +3,14 @@ FROM php:8.3-fpm
 # Устанавливаем необходимые зависимости
 RUN apt-get update && apt-get install -y \
     git \
+    libmcrypt-dev \
     libzip-dev \
     libpq-dev \
-    unzip \
+    zip \
     && rm -rf /var/lib/apt/lists/*
 
 # Устанавливаем расширения PHP
-RUN docker-php-ext-install zip pdo pdo_pgsql opcache
+RUN docker-php-ext-install zip pdo pdo_pgsql
 
 # Настройка PHP
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/
@@ -28,17 +29,14 @@ RUN pecl install xdebug && docker-php-ext-enable xdebug
 # Устанавливаем рабочую директорию
 WORKDIR /var/www/html
 
-# Копируем только файлы, необходимые для установки зависимостей
-COPY composer.json composer.lock symfony.lock ./
+# Копируем весь исходный код
+COPY . /var/www/html
 
 # Устанавливаем зависимости Composer
 RUN composer install
-
-# Копируем весь исходный код
-COPY . .
 
 # Указываем пользователя для выполнения команд
 USER www-data
 
 # Права для веб-сервера
-RUN chown -R www-data:www-data /var/www/html/var
+#RUN chown -R www-data:www-data /var/www/html/var
