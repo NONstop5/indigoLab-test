@@ -41,4 +41,6 @@ phpstan.neon
 ###> IDE files ###
 /docker/pgdata
 /docker/.env
+/docker/.env.*
+docker-compose.override.yml
 ###> IDE files ###
