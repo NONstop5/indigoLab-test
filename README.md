@@ -4,7 +4,7 @@
 ## IndigoLab test project
 
 ### Requirements
-- PHP >= 8.4
+- PHP >= 8.3
 - Composer >= 2
 - Make >= 4
 - Docker
