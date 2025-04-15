@@ -32,6 +32,8 @@ return (new PhpCsFixer\Config())
         'concat_space' => ['spacing' => 'one'],
         'yoda_style' => false,
         'global_namespace_import' => true,
+        'native_function_invocation' => false,
+        'native_constant_invocation' => false,
     ])
     ->setFinder($finder)
     ->setCacheFile(__DIR__ . '/var/.php-cs-fixer.cache')
