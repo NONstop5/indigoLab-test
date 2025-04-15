@@ -1,42 +1,69 @@
 FROM php:8.3-fpm
 
+# Устанавливаем пользователя/группу из аргументов
+ARG UID=${UID}
+ARG GID=${GID}
+ARG APP_ENV=${APP_ENV}
+
 # Устанавливаем необходимые зависимости
 RUN apt-get update && apt-get install -y \
-    git \
-    libmcrypt-dev \
+    bash-completion \
     libzip-dev \
     libpq-dev \
+    libicu-dev \
+    unzip \
+    curl \
     zip \
-    && rm -rf /var/lib/apt/lists/*
+    git
 
-# Устанавливаем расширения PHP
-RUN docker-php-ext-install zip pdo pdo_pgsql
+# Расширения PHP
+RUN docker-php-ext-install zip pdo pdo_mysql pdo_pgsql
 
-# Настройка PHP
-COPY docker/php/php.ini /usr/local/etc/php/conf.d/
+# Алиасы и автодополнение
+RUN echo "alias ll='ls -alF'" >> /etc/bash.bashrc
+RUN echo 'source /etc/bash_completion' >> /etc/bash.bashrc
+
+# Пользователь и права
+RUN groupmod -g ${GID} www-data && \
+    usermod -u ${UID} www-data && \
+    chown -R ${UID}:${GID} /var/www/html
+
+# Логи Xdebug (только для dev)
+RUN if [ "$APP_ENV" = "dev" ]; then \
+    mkdir -p /var/log/xdebug && \
+    chown -R ${UID}:${GID} /var/log/xdebug && \
+    chmod -R 766 /var/log/xdebug; \
+    fi
+
+# Конфиги PHP
+COPY docker/php/conf.d/php.ini /usr/local/etc/php/conf.d/
+COPY docker/php/conf.d/xdebug.ini /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
 # Устанавливаем Composer
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
     && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
     && php -r "unlink('composer-setup.php');"
 
-# Устанавливаем Xdebug
-RUN pecl install xdebug && docker-php-ext-enable xdebug
-
-# Копируем конфигурацию Xdebug
-#COPY xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
+# Xdebug (только для dev)
+RUN if [ "$APP_ENV" = "dev" ]; then \
+    pecl install xdebug && \
+    docker-php-ext-enable xdebug && \
+    pecl clear-cache \
+    rm -rf /tmp/pear; \
+    fi
 
 # Устанавливаем рабочую директорию
 WORKDIR /var/www/html
 
-# Копируем весь исходный код
-COPY . /var/www/html
+# Копируем все файлы
+COPY . .
 
-# Устанавливаем зависимости Composer
-RUN composer install
+# Устанавливаем зависимости
+RUN if [ "$APP_ENV" = "prod" ]; then \
+    composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist; \
+    else \
+    composer install --no-interaction --prefer-dist; \
+    fi
 
 # Указываем пользователя для выполнения команд
-USER www-data
-
-# Права для веб-сервера
-#RUN chown -R www-data:www-data /var/www/html/var
+USER ${UID}:${GID}

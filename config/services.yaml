@@ -22,3 +22,15 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    # Конфиг Redis клиента
+    Predis\Client:
+        arguments:
+            - scheme: 'tcp'
+              host: '%env(REDIS_HOST)%'
+              port: '%env(REDIS_PORT)%'
+              database: '%env(REDIS_DB)%'
+    # Redis сервис
+    App\Service\RedisService:
+        arguments:
+            $redisClient: '@Predis\Client'

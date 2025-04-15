@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Dto\Request\RequestPhoneCodeDto;
 use App\Dto\Request\VerifyPhoneCodeDto;
 use App\Service\PhoneVerificationService;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
@@ -13,7 +14,7 @@ use Symfony\Component\Routing\Attribute\Route;
 final class UserController extends AbstractController
 {
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     #[Route(
         '/request-code',
@@ -30,7 +31,7 @@ final class UserController extends AbstractController
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     #[Route('/verify-code', methods: ['POST'])]
     public function verifyCode(

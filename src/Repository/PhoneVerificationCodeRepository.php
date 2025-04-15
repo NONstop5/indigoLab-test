@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\PhoneVerificationCode;
+use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Types\Types;
@@ -23,7 +24,7 @@ class PhoneVerificationCodeRepository extends ServiceEntityRepository
      */
     public function getRecentCodesCount(
         string $phoneNumber,
-        \DateTimeImmutable $recentDateTime,
+        DateTimeImmutable $recentDateTime,
     ): int {
         $sql = '
             SELECT COUNT(1)

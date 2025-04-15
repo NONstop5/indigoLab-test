@@ -6,11 +6,8 @@ parameters:
     paths:
         - src
         - tests
-#        - bin/
-#        - config/
-#        - public/
-#        - src/
-#        - tests/
+    ignoreErrors:
+    excludePaths:
 
 #    bootstrapFiles:
 #        - vendor/bin/.phpunit/phpunit/vendor/autoload.php

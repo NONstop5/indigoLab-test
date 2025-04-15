@@ -15,7 +15,7 @@ phpcsfixer-fix:
 	vendor/bin/php-cs-fixer fix
 
 phpstan:
-	vendor/bin/phpstan analyse
+	vendor/bin/phpstan analyse --memory-limit=512M
 
 phpstan-baseline:
 	vendor/bin/phpstan analyse src tests --generate-baseline
@@ -31,5 +31,16 @@ docker-down:
 
 docker-build:
 	docker-compose --env-file ./docker/.env build
+	docker-compose --env-file ./docker/.env up -d
+
+docker-rebuild:
+	docker-compose --env-file ./docker/.env build --no-cache
+	docker-compose --env-file ./docker/.env up -d
+
+docker-config:
+	docker-compose --env-file ./docker/.env config
+
+shell:
+	docker-compose exec php bash
 
 .PHONY: tests
