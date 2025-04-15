@@ -15,7 +15,7 @@ phpcsfixer-fix:
 	vendor/bin/php-cs-fixer fix
 
 phpstan:
-	vendor/bin/phpstan analyse
+	vendor/bin/phpstan analyse --memory-limit=512M
 
 phpstan-baseline:
 	vendor/bin/phpstan analyse src tests --generate-baseline
