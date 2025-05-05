@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     libicu-dev \
     unzip \
+    make \
     curl \
     zip \
     git
