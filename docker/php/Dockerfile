@@ -1,9 +1,8 @@
 FROM php:8.3-fpm
 
-# Устанавливаем пользователя/группу из аргументов
-ARG UID=${UID}
-ARG GID=${GID}
-ARG APP_ENV=${APP_ENV}
+ARG USER_ID
+ARG GROUP_ID
+ARG APP_ENV
 
 # Устанавливаем необходимые зависимости
 RUN apt-get update && apt-get install -y \
@@ -15,7 +14,9 @@ RUN apt-get update && apt-get install -y \
     make \
     curl \
     zip \
-    git
+    git \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Расширения PHP
 RUN docker-php-ext-install zip pdo pdo_mysql pdo_pgsql
@@ -24,15 +25,17 @@ RUN docker-php-ext-install zip pdo pdo_mysql pdo_pgsql
 RUN echo "alias ll='ls -alF'" >> /etc/bash.bashrc
 RUN echo 'source /etc/bash_completion' >> /etc/bash.bashrc
 
-# Пользователь и права
-RUN groupmod -g ${GID} www-data && \
-    usermod -u ${UID} www-data && \
-    chown -R ${UID}:${GID} /var/www/html
+# Создаем группу и пользователя
+RUN groupadd -g ${GROUP_ID} appgroup && \
+    useradd -u ${USER_ID} -g appgroup -m appuser
+
+# Устанавливаем права на директории
+RUN chown -R appuser:appgroup /var/www/html
 
 # Логи Xdebug (только для dev)
-RUN if [ "$APP_ENV" = "dev" ]; then \
+RUN if [ "${APP_ENV}" = "dev" ]; then \
     mkdir -p /var/log/xdebug && \
-    chown -R ${UID}:${GID} /var/log/xdebug && \
+    chown -R appuser:appgroup /var/log/xdebug && \
     chmod -R 766 /var/log/xdebug; \
     fi
 
@@ -46,7 +49,7 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
     && php -r "unlink('composer-setup.php');"
 
 # Xdebug (только для dev)
-RUN if [ "$APP_ENV" = "dev" ]; then \
+RUN if [ "${APP_ENV}" = "dev" ]; then \
     pecl install xdebug && \
     docker-php-ext-enable xdebug && \
     pecl clear-cache \
@@ -56,15 +59,18 @@ RUN if [ "$APP_ENV" = "dev" ]; then \
 # Устанавливаем рабочую директорию
 WORKDIR /var/www/html
 
+# Устанавливаем пользователя в окружении
+USER appuser
+
 # Копируем все файлы
 COPY . .
 
 # Устанавливаем зависимости
-RUN if [ "$APP_ENV" = "prod" ]; then \
+RUN if [ "${APP_ENV}" = "prod" ]; then \
     composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist; \
     else \
     composer install --no-interaction --prefer-dist; \
     fi
 
 # Указываем пользователя для выполнения команд
-USER ${UID}:${GID}
+USER appuser:appgroup
