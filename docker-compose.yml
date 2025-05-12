@@ -11,7 +11,7 @@ services:
                 APP_ENV: ${APP_ENV:-prod}
         container_name: "${PROJECT_NAME}-app"
         restart: unless-stopped
-        user: "${UID:-1000}:${GID:-1000}"
+        user: ${UID:-1000}:${GID:-1000}
         environment:
             APP_ENV: ${APP_ENV}
             APP_DEBUG: ${APP_DEBUG}
@@ -21,10 +21,13 @@ services:
             XDEBUG_TRIGGER: ${XDEBUG_TRIGGER:-TRIGGER}
             XDEBUG_CONFIG: "client_host=${XDEBUG_HOST:-host.docker.internal} discover_client_host=1 log=/var/log/xdebug/xdebug.log"
             PHP_IDE_CONFIG: "serverName=Docker"
-            TZ: ${TZ}
+            TZ: ${TZ:-UTC}
         volumes:
             - ./:/var/www/html
-        command: bash -c "composer install --no-interaction --prefer-dist && php-fpm"
+        entrypoint: ["/bin/bash", "-c"]
+        command: |
+            composer install --no-interaction --prefer-dist
+            php-fpm
         depends_on:
             - db
             - redis
@@ -55,7 +58,7 @@ services:
             POSTGRES_USER: ${POSTGRES_USER}
             POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
             POSTGRES_ROOT_PASSWORD: ${POSTGRES_ROOT_PASSWORD}
-            TZ: ${TZ}
+            TZ: ${TZ:-UTC}
         ports:
             - "${POSTGRES_PORT}:5432"
         volumes:
